@@ -11,3 +11,10 @@
 
 ---
 
+KV parsing inspired by logstash's kv plugin.
+
+Parses a string into a map. It is possible to split based on different characters that represent
+either field or key value boundaries.
+
+A good part of the logstash functionality will be handled outside of this function and in a
+generic way in tremor script.
