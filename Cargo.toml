@@ -1,5 +1,5 @@
 [package]
-name = "kv"
+name = "tremor-kv"
 version = "0.1.0"
 authors = ["The Tremor Team"]
 edition = "2018"
