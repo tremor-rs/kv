@@ -59,8 +59,9 @@
 #![allow(clippy::must_use_candidate)]
 
 use serde::{Deserialize, Serialize};
-use simd_json::value::borrowed::{Object, Value};
+use simd_json::{MutableValue, Value, ValueBuilder};
 use std::fmt;
+use std::hash::Hash;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -196,19 +197,21 @@ impl Pattern {
     /// * `input` - The input string
     ///
     /// Note: Fields that have on value are dropped.
-    pub fn run<'input>(&self, input: &'input str) -> Option<Object<'input>> {
-        let r: Object = multi_split(input, &self.field_seperators)
-            .iter()
-            .filter_map(|field| {
-                let kv: Vec<&str> = multi_split(field, &self.key_seperators);
-                if kv.len() == 2 {
-                    Some((kv[0].into(), Value::from(kv[1])))
-                } else {
-                    None
-                }
-            })
-            .collect();
-        if r.is_empty() {
+    pub fn run<'input, V>(&self, input: &'input str) -> Option<V>
+    where
+        V: Value + MutableValue + ValueBuilder<'input> + 'input,
+        <V as MutableValue>::Key: From<&'input str> + Eq + Hash,
+    {
+        let mut r = V::object();
+        let mut empty = true;
+        for field in multi_split(input, &self.field_seperators) {
+            let kv: Vec<&str> = multi_split(field, &self.key_seperators);
+            if kv.len() == 2 {
+                empty = false;
+                r.insert(kv[0], kv[1]).ok()?;
+            }
+        }
+        if empty {
             None
         } else {
             Some(r)
@@ -235,6 +238,7 @@ fn multi_split<'input>(input: &'input str, seperators: &[String]) -> Vec<&'input
 #[cfg(test)]
 mod test {
     use super::*;
+    use simd_json::BorrowedValue;
 
     #[test]
     fn test_multisplit() {
@@ -248,8 +252,8 @@ mod test {
 
     fn simple_split() {
         let kv = Pattern::compile("%{key}=%{val}").expect("Failed to build pattern");
-        let r = kv.run("this=is a=test").expect("Failed to split input");
-        assert_eq!(r.len(), 2);
+        let r: BorrowedValue = kv.run("this=is a=test").expect("Failed to split input");
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -257,16 +261,16 @@ mod test {
     #[test]
     fn simple_split2() {
         let kv = Pattern::compile("&%{key}=%{val}").expect("Failed to build pattern");
-        let r = kv.run("this=is&a=test").expect("Failed to split input");
-        assert_eq!(r.len(), 2);
+        let r: BorrowedValue = kv.run("this=is&a=test").expect("Failed to split input");
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
     #[test]
     fn newline_simple_() {
         let kv = Pattern::compile(r#"\n%{key}=%{val}"#).expect("Failed to build pattern");
-        let r = kv.run("this=is\na=test").expect("Failed to split input");
-        assert_eq!(r.len(), 2);
+        let r: BorrowedValue = kv.run("this=is\na=test").expect("Failed to split input");
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -274,8 +278,8 @@ mod test {
     #[test]
     fn simple_split3() {
         let kv = Pattern::compile("&").expect("Failed to build pattern");
-        let r = kv.run("this:is&a:test").expect("Failed to split input");
-        assert_eq!(r.len(), 2);
+        let r: BorrowedValue = kv.run("this:is&a:test").expect("Failed to split input");
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -283,8 +287,8 @@ mod test {
     #[test]
     fn simple_split4() {
         let kv = Pattern::compile("%{key}%{%{val}").expect("Failed to build pattern");
-        let r = kv.run("this%{is a%{test").expect("Failed to split input");
-        assert_eq!(r.len(), 2);
+        let r: BorrowedValue = kv.run("this%{is a%{test").expect("Failed to split input");
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -293,10 +297,10 @@ mod test {
     fn simple_split5() {
         let kv = Pattern::compile("%{key}%{key}%{val}").expect("Failed to build pattern");
         dbg!(&kv);
-        let r = kv
+        let r: BorrowedValue = kv
             .run("this%{key}is a%{key}test")
             .expect("Failed to split input");
-        assert_eq!(r.len(), 2);
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -313,15 +317,15 @@ mod test {
     #[test]
     fn one_field() {
         let kv = Pattern::compile("%{key}=%{val}").expect("Failed to build pattern");
-        let r = kv.run("this=is").expect("Failed to split input");
-        assert_eq!(r.len(), 1);
+        let r: BorrowedValue = kv.run("this=is").expect("Failed to split input");
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 1);
         assert_eq!(r["this"], "is");
     }
 
     #[test]
     fn no_split() {
         let kv = Pattern::compile("%{key}=%{val}").expect("Failed to build pattern");
-        let r = kv.run("this is a test");
+        let r: Option<BorrowedValue> = kv.run("this is a test");
         assert!(r.is_none());
     }
 
@@ -329,12 +333,12 @@ mod test {
     fn different_seperatpors() {
         let kv = Pattern::compile("%{key}=%{val};%{key}:%{val} %{key}:%{val}")
             .expect("Failed to build pattern");
-        let r = kv
+        dbg!(&kv);
+        let r: BorrowedValue = kv
             .run("this=is;a=test for:seperators")
             .expect("Failed to split input");
         dbg!(&r);
-        dbg!(&kv);
-        assert_eq!(r.len(), 3);
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 3);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
         assert_eq!(r["for"], "seperators");
@@ -344,12 +348,12 @@ mod test {
     fn different_seperatpors2() {
         let kv = Pattern::compile("%{key}=%{val}%{key}:%{val} %{key}:%{val};")
             .expect("Failed to build pattern");
-        let r = kv
+        let r: BorrowedValue = kv
             .run("this=is;a=test for:seperators")
             .expect("Failed to split input");
         dbg!(&r);
         dbg!(&kv);
-        assert_eq!(r.len(), 3);
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 3);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
         assert_eq!(r["for"], "seperators");
@@ -359,12 +363,12 @@ mod test {
     fn invalid_pattern2() {
         let kv = Pattern::compile("%{key}=%{val};%{key}:%{val} %{key}:%{val}")
             .expect("Failed to build pattern");
-        let r = kv
+        let r: BorrowedValue = kv
             .run("this=is;a=test for:seperators")
             .expect("Failed to split input");
         dbg!(&r);
         dbg!(&kv);
-        assert_eq!(r.len(), 3);
+        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 3);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
         assert_eq!(r["for"], "seperators");
