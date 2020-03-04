@@ -1,11 +1,11 @@
 # KV &emsp; ![Build Status] ![Quality Checks] ![License Checks] ![Security Checks] [![Code Coverage]][codecov.io]
 
-[Build Status]: https://github.com/wayfair-incubator/kv/workflows/Tests/badge.svg
-[Quality Checks]: https://github.com/wayfair-incubator/kv/workflows/Checks/badge.svg
-[License Checks]: https://github.com/wayfair-incubator/kv/workflows/License%20audit/badge.svg
-[Security Checks]: https://github.com/wayfair-incubator/kv/workflows/Security%20audit/badge.svg
-[Code Coverage]: https://codecov.io/gh/wayfair-incubator/kv/branch/master/graph/badge.svg
-[codecov.io]: https://codecov.io/gh/wayfair-incubator/kv
+[Build Status]: https://github.com/wayfair-tremor/kv/workflows/Tests/badge.svg
+[Quality Checks]: https://github.com/wayfair-tremor/kv/workflows/Checks/badge.svg
+[License Checks]: https://github.com/wayfair-tremor/kv/workflows/License%20audit/badge.svg
+[Security Checks]: https://github.com/wayfair-tremor/kv/workflows/Security%20audit/badge.svg
+[Code Coverage]: https://codecov.io/gh/wayfair-tremor/kv/branch/master/graph/badge.svg
+[codecov.io]: https://codecov.io/gh/wayfair-tremor/kv
 
 **kv parser**
 
@@ -18,3 +18,18 @@ either field or key value boundaries.
 
 A good part of the logstash functionality will be handled outside of this function and in a
 generic way in tremor script.
+
+## Use as a library
+
+The kv parser was designed so that KV style parsing could be embedded into [tremor](https://www.tremor.rs)'s [scripting](https://docs.tremor.rs/tremor-script/) language for [extract](https://docs.tremor.rs/tremor-script/extractors/kv/) operations.
+
+The parser can also be used standalone
+
+```rust
+  let kv = Pattern::compile("%{key}%{%{val}").expect("Failed to build pattern");
+  let r = kv.run("this%{is a%{test").expect("Failed to split input");
+  assert_eq!(r.len(), 2);
+  assert_eq!(r["this"], "is");
+  assert_eq!(r["a"], "test");
+```
+
