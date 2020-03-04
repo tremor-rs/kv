@@ -1,11 +1,11 @@
 [package]
 name = "tremor-kv"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["The Tremor Team"]
 edition = "2018"
 license = "Apache-2.0"
 description = "A logstash inspured key value extractor"
 
 [dependencies]
-simd-json = {version = "0.2", features = ["known-key"]}
+simd-json = {version = "0.3", features = ["known-key"]}
 serde = "1"
