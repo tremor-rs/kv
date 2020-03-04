@@ -59,9 +59,8 @@
 #![allow(clippy::must_use_candidate)]
 
 use serde::{Deserialize, Serialize};
-use simd_json::{MutableValue, Value, ValueBuilder};
+use simd_json::prelude::*;
 use std::fmt;
-use std::hash::Hash;
 
 #[derive(Debug, PartialEq)]
 pub enum Error {
@@ -199,8 +198,8 @@ impl Pattern {
     /// Note: Fields that have on value are dropped.
     pub fn run<'input, V>(&self, input: &'input str) -> Option<V>
     where
-        V: Value + MutableValue + ValueBuilder<'input> + 'input,
-        <V as MutableValue>::Key: From<&'input str> + Eq + Hash,
+        V: ValueTrait + Mutable + Builder<'input> + 'input,
+        <V as ValueTrait>::Key: std::convert::From<&'input str>,
     {
         let mut r = V::object();
         let mut empty = true;
