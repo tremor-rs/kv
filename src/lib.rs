@@ -122,6 +122,9 @@ fn handle_escapes(s: &str) -> Result<String, Error> {
 }
 
 impl Pattern {
+    /// compiles a pattern
+    /// # Errors
+    /// fails if the pattern is invalid
     pub fn compile(pattern: &str) -> Result<Self, Error> {
         let mut field_seperators = Vec::new();
         let mut key_seperators = Vec::new();
