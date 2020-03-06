@@ -389,8 +389,6 @@ map::select(<map>, [<key>, ...])
 
 /*
 
-https://codesearch.csnzoo.com/source/xref/wayfair%3Apuppet/modules/logstash/templates/conf/logstash.solr.transform.conf.erb
-
 15 kv {
 16   source       => "full_message"
 17   include_keys => ["hits", "status", "QTime"]
@@ -401,8 +399,6 @@ https://codesearch.csnzoo.com/source/xref/wayfair%3Apuppet/modules/logstash/temp
 22   field_split  => "&"
 23   include_keys => ["qt"]
 24 }
-
-https://codesearch.csnzoo.com/source/xref/wayfair%3Apuppet/modules/logstash/templates/conf/logstash.solr.transform.conf.erb
 
 92   kv {
 93     source       => "naxsi_params"
@@ -416,8 +412,6 @@ https://codesearch.csnzoo.com/source/xref/wayfair%3Apuppet/modules/logstash/temp
 145         include_keys => ["_controller", "_action"]
 146         remove_field => "dispatcher_params"
 147       }
-
-https://codesearch.csnzoo.com/source/xref/wayfair%3Apuppet/modules/logstash/templates/conf/logstash.git.transform.conf.erb
 
 22     kv {
 23       source => "syslog_message"
