@@ -6,8 +6,8 @@
 [Security Checks]: https://github.com/wayfair-tremor/kv/workflows/Security%20audit/badge.svg
 [Code Coverage]: https://codecov.io/gh/wayfair-tremor/kv/branch/main/graph/badge.svg
 [codecov.io]: https://codecov.io/gh/wayfair-tremor/kv
-[Latest Version]: https://img.shields.io/crates/v/simd-json.svg
-[crates.io]: https://crates.io/crates/simd-json
+[Latest Version]: https://img.shields.io/crates/v/tremor-kv.svg
+[crates.io]: https://crates.io/crates/tremor-kv
 
 **kv parser**
 
