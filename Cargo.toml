@@ -8,5 +8,5 @@ description = "A logstash inspured key value extractor"
 readme = "README.md"
 
 [dependencies]
-simd-json = {version = "0.3", features = ["known-key"]}
+simd-json = {version = "0.4", features = ["known-key"]}
 serde = "1"
