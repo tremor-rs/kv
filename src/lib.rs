@@ -47,7 +47,7 @@
 // | value_split            | supported, array of strings                             | Yes       |
 // | value_split_pattern    | not supported                                           | No        |
 // | whitespace             | we always run in 'lenient mode' as is the default of LS | No        |
-#![forbid(warnings)]
+#![deny(warnings)]
 #![recursion_limit = "1024"]
 #![deny(
     clippy::all,
@@ -163,7 +163,7 @@ impl Pattern {
         key_seperators.dedup();
 
         for fs in &field_seperators {
-            if key_seperators.iter().any(|ks| ks.find(fs).is_some()) {
+            if key_seperators.iter().any(|ks| ks.contains(fs)) {
                 return Err(Error::DoubleSeperator(fs.to_string()));
             }
 
@@ -176,7 +176,7 @@ impl Pattern {
         }
 
         for ks in &key_seperators {
-            if field_seperators.iter().any(|fs| fs.find(ks).is_some()) {
+            if field_seperators.iter().any(|fs| fs.contains(ks)) {
                 return Err(Error::DoubleSeperator(ks.to_string()));
             }
 
@@ -200,8 +200,8 @@ impl Pattern {
     /// Note: Fields that have on value are dropped.
     pub fn run<'input, V>(&self, input: &'input str) -> Option<V>
     where
-        V: ValueTrait + Mutable + Builder<'input> + 'input,
-        <V as ValueTrait>::Key: std::convert::From<&'input str>,
+        V: ValueTrait + ValueAccess<Target = V> + Mutable + Builder<'input> + 'input,
+        <V as ValueAccess>::Key: std::convert::From<&'input str>,
     {
         let mut r = V::object();
         let mut empty = true;
