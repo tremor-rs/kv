@@ -6,7 +6,7 @@ help() {
 Usage: ${0##*/} [-hd] [TEST]...
 code sanity checker
   -h         show this help
-  -a         run all chekcs
+  -a         run all checks
   -u         check for unwrap
   -i         check for unimplemented
   -r         check for unreachable
@@ -14,9 +14,11 @@ code sanity checker
   -l         check for let _
   -e         check for expect
   -d         check for dbg!
+  -t         check for todo!
   -x         check for std::process::exit
   -b         check for bracket access
   -c         check for pedantic and other checks
+  -f         check for fixme
 EOF
 }
 
@@ -24,21 +26,32 @@ EOF
 
 files=$(find . -name '*.rs' | grep -v -f .checkignore)
 
-while getopts hauiprebldxc opt; do
+while getopts hauiprebldxcft opt; do
     case $opt in
         h)
             help
             exit 0
             ;;
         a)
-            exec "$0" -uirpeldxc
+            exec "$0" -uirpeldxcftb
             ;;
         u)
             for file in $files
             do
-                if sed -e '/mod test.*/,$d' -e '/ALLOW: /{N;d;}' "$file" | grep 'unwrap()' > /dev/null
+                if sed -e '/mod test.*/,$d' -e '/ALLOW: /{N;d;}' "$file" | grep -v '^[ ]*//' |  grep 'unwrap()' > /dev/null
                 then
                     echo "##[error] unwrap found in $file don't unwrap it panics."
+                    count=$((count + 1))
+                fi
+            done
+            ;;
+        f)
+            for file in $files
+            do
+                if grep 'FIXME' "$file" > /dev/null
+                then
+                    echo "##[error] FIXME found in $file."
+                    grep -nH 'FIXME' "$file"
                     count=$((count + 1))
                 fi
             done
@@ -75,7 +88,7 @@ while getopts hauiprebldxc opt; do
                     count=$((count + 1))
                 fi
             done
-            ;;  
+            ;;
         d)
             for file in $files
             do
@@ -86,7 +99,19 @@ while getopts hauiprebldxc opt; do
                     count=$((count + 1))
                 fi
             done
-            ;;  
+            ;;
+        t)
+            for file in $files
+            do
+                if sed -e '/mod test.*/,$d' -e '/ALLOW: /{N;d;}' "$file" | grep 'todo!' > /dev/null
+                then
+                    echo "##[error] todo! found in \"$file\". Just do it!."
+                    grep -nH 'todo!' "$file"
+                    count=$((count + 1))
+                fi
+            done
+            ;;
+
 
         x)
             for file in $files
@@ -98,11 +123,11 @@ while getopts hauiprebldxc opt; do
                     count=$((count + 1))
                 fi
             done
-            ;;                  
+            ;;
         p)
             for file in $files
             do
-                if sed -e '/mod test.*/,$d' "$file" | grep 'panic!(' > /dev/null
+                if sed -e '/mod test.*/,$d' -e '/ALLOW: /{N;d;}' "$file" | grep 'panic!(' > /dev/null
                 then
                     echo "##[error] panic found in $file no, just no!"
                     grep -nH 'panic!(' "$file"
@@ -115,7 +140,7 @@ while getopts hauiprebldxc opt; do
             do
                 if sed -e '/mod test.*/,$d' -e '/ALLOW: /{N;d;}' "$file" | grep 'expect(' > /dev/null
                 then
-                    echo "##[error] expect found in $file try hygenic errors, this panics!"
+                    echo "##[error] expect found in $file try hygienic errors, this panics!"
                     count=$((count + 1))
                 fi
             done
@@ -123,30 +148,26 @@ while getopts hauiprebldxc opt; do
         b)
             for file in $files
             do
-                if sed -e '/mod test.*/,$d' -e '/ALLOW: /{N;d;}' "$file" | grep '[a-z]\[' > /dev/null
+                if sed -e '/mod test.*/,$d' -e '/ALLOW: /{N;d;}' "$file" | grep -v '^[ ]*//' | grep '[a-z]\[' > /dev/null
                 then
                     echo "##[error] array access ([...]) found in $file that could go wrong, array access can panic."
+                    grep -nH '[a-z]\[' "$file"
                     count=$((count + 1))
                 fi
             done
             ;;
         c)
-            files=$(find . -name 'lib.rs' -or -name 'main.rs' | grep -v -f .checkignore)
-            for file in $files
+            c_files=$(find . -name 'lib.rs' -or -name 'main.rs' | grep -v -f .checkignore)
+            for file in $c_files
             do
                 if  ! grep 'clippy::pedantic' "$file" > /dev/null
                 then
                     echo "##[error] $file does not enforce clippy::pedantic."
                     count=$((count + 1))
                 fi
-                if  ! grep 'clippy::result_unwrap_used' "$file" > /dev/null
+                if  ! grep 'clippy::unwrap_used' "$file" > /dev/null
                 then
-                    echo "##[error] $file does not enforce clippy::result_unwrap_used."
-                    count=$((count + 1))
-                fi
-                if  ! grep 'clippy::option_unwrap_used' "$file" > /dev/null
-                then
-                    echo "##[error] $file does not enforce clippy::option_unwrap_used."
+                    echo "##[error] $file does not enforce clippy::unwrap_used."
                     count=$((count + 1))
                 fi
                 if  ! grep 'clippy::unnecessary_unwrap' "$file" > /dev/null
@@ -159,18 +180,11 @@ while getopts hauiprebldxc opt; do
                     echo "##[error] $file does not enforce clippy::all."
                     count=$((count + 1))
                 fi
-                # if  grep 'clippy::missing_errors_doc' "$file" > /dev/null
-                # then
-                #     echo "##[error] $file does not enforce clippy::missing_errors_doc is mentioend but shouldn't be allowed."
-                #     count=$((count + 1))
-                # fi
                 if  ! grep 'missing_docs' "$file" > /dev/null
                 then
                     echo "##[error] $file does not enforce missing_docs."
                     count=$((count + 1))
                 fi
-
-
             done
             ;;
         *)
