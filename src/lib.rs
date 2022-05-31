@@ -152,10 +152,10 @@ impl Pattern {
             }
         }
         if field_seperators.is_empty() {
-            field_seperators.push(" ".to_string())
+            field_seperators.push(" ".to_string());
         }
         if key_seperators.is_empty() {
-            key_seperators.push(":".to_string())
+            key_seperators.push(":".to_string());
         }
         field_seperators.sort();
         key_seperators.sort();
