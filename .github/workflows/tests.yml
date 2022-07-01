@@ -7,32 +7,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Install deps [Linux]
-        run: sudo apt-get -qy update && sudo apt-get install -y libssl-dev libssl1.1
       - uses: actions-rs/toolchain@v1
         with:
-          override: true
           profile: minimal
-      - name: Run tests
-        run: cargo test --all
-  code-coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Install deps
-        run: sudo apt-get -qy update && sudo apt-get install -y libssl-dev libssl1.1
-      - uses: actions-rs/toolchain@v1
-        with:
-          override: true
-          profile: minimal
-      - name: Run cargo-tarpaulin
-        uses: actions-rs/tarpaulin@v0.1
+          components: llvm-tools-preview
+      - uses: Swatinem/rust-cache@v1
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Generate code coverage
         env:
-          RUSTFLAGS: -C target-cpu=native
+          RUSTFLAGS: -D warnings
+          RUST_BACKTRACE: 1
+        run: cargo llvm-cov --workspace --lcov --output-path lcov.txt --features integration
+      - uses: codecov/codecov-action@v3
         with:
-          version: "0.14.2"
-          args: " --exclude-files target* --all"
-      - uses: codecov/codecov-action@v1.0.2
-        with:
-          token: ${{secrets.CODECOV_TOKEN}} #required
-          file: ./cobertura.xml
+          #token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          files: ./lcov.txt # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)   
