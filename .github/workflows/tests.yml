@@ -18,7 +18,7 @@ jobs:
         env:
           RUSTFLAGS: -D warnings
           RUST_BACKTRACE: 1
-        run: cargo llvm-cov --workspace --lcov --output-path lcov.txt --features integration
+        run: cargo llvm-cov --workspace --lcov --output-path lcov.txt
       - uses: codecov/codecov-action@v3
         with:
           #token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
