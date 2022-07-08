@@ -11,6 +11,7 @@ jobs:
         with:
           profile: minimal
           components: llvm-tools-preview
+          toolchain: stable
       - uses: Swatinem/rust-cache@v1
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
@@ -21,7 +22,6 @@ jobs:
         run: cargo llvm-cov --workspace --lcov --output-path lcov.txt
       - uses: codecov/codecov-action@v3
         with:
-          #token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
           files: ./lcov.txt # optional
           fail_ci_if_error: true # optional (default = false)
           verbose: true # optional (default = false)   
