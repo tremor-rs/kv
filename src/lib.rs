@@ -61,7 +61,7 @@ use serde::{Deserialize, Serialize};
 use simd_json::prelude::*;
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Error {
     InvalidPattern(usize),
     DoubleSeperator(String),
@@ -81,7 +81,7 @@ impl fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize, Eq)]
 pub struct Pattern {
     field_seperators: Vec<String>,
     key_seperators: Vec<String>,
