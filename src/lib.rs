@@ -71,9 +71,9 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::InvalidPattern(p) => write!(f, "invalid pattern at character {}", p),
-            Self::DoubleSeperator(s) => write!(f, "The seperator '{}' is used for both key value seperation as well as pair seperation.", s),
-            Self::InvalidEscape(s) => write!(f, "Invalid escape sequence \\'{}' is not valid.", s),
+            Self::InvalidPattern(p) => write!(f, "invalid pattern at character {p}"),
+            Self::DoubleSeperator(s) => write!(f, "The seperator '{s}' is used for both key value seperation as well as pair seperation."),
+            Self::InvalidEscape(s) => write!(f, "Invalid escape sequence \\'{s}' is not valid."),
             Self::UnterminatedEscape => write!(f, "Unterminated escape at the end of line or of a delimiter %{{ can't be escaped"),
         }
     }
@@ -239,6 +239,7 @@ fn multi_split<'input>(input: &'input str, seperators: &[String]) -> Vec<&'input
 #[cfg(test)]
 mod test {
     use super::*;
+    use simd_json::borrowed::Object;
     use simd_json::BorrowedValue;
 
     #[test]
@@ -254,7 +255,7 @@ mod test {
     fn simple_split() {
         let kv = Pattern::compile("%{key}=%{val}").expect("Failed to build pattern");
         let r: BorrowedValue = kv.run("this=is a=test").expect("Failed to split input");
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -263,7 +264,7 @@ mod test {
     fn simple_split2() {
         let kv = Pattern::compile("&%{key}=%{val}").expect("Failed to build pattern");
         let r: BorrowedValue = kv.run("this=is&a=test").expect("Failed to split input");
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -271,7 +272,7 @@ mod test {
     fn newline_simple_() {
         let kv = Pattern::compile(r#"\n%{key}=%{val}"#).expect("Failed to build pattern");
         let r: BorrowedValue = kv.run("this=is\na=test").expect("Failed to split input");
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -280,7 +281,7 @@ mod test {
     fn simple_split3() {
         let kv = Pattern::compile("&").expect("Failed to build pattern");
         let r: BorrowedValue = kv.run("this:is&a:test").expect("Failed to split input");
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -289,7 +290,7 @@ mod test {
     fn simple_split4() {
         let kv = Pattern::compile("%{key}%{%{val}").expect("Failed to build pattern");
         let r: BorrowedValue = kv.run("this%{is a%{test").expect("Failed to split input");
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -301,7 +302,7 @@ mod test {
         let r: BorrowedValue = kv
             .run("this%{key}is a%{key}test")
             .expect("Failed to split input");
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 2);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
     }
@@ -319,7 +320,7 @@ mod test {
     fn one_field() {
         let kv = Pattern::compile("%{key}=%{val}").expect("Failed to build pattern");
         let r: BorrowedValue = kv.run("this=is").expect("Failed to split input");
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 1);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 1);
         assert_eq!(r["this"], "is");
     }
 
@@ -339,7 +340,7 @@ mod test {
             .run("this=is;a=test for:seperators")
             .expect("Failed to split input");
         dbg!(&r);
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 3);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 3);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
         assert_eq!(r["for"], "seperators");
@@ -354,7 +355,7 @@ mod test {
             .expect("Failed to split input");
         dbg!(&r);
         dbg!(&kv);
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 3);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 3);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
         assert_eq!(r["for"], "seperators");
@@ -369,7 +370,7 @@ mod test {
             .expect("Failed to split input");
         dbg!(&r);
         dbg!(&kv);
-        assert_eq!(r.as_object().map(|v| v.len()).unwrap_or_default(), 3);
+        assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 3);
         assert_eq!(r["this"], "is");
         assert_eq!(r["a"], "test");
         assert_eq!(r["for"], "seperators");
