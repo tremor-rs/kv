@@ -309,12 +309,30 @@ mod test {
 
     #[test]
     fn invalid_pattern() {
+        let kv = Pattern::compile("%{key} ");
+        let e = kv.expect_err("no error");
+        assert_eq!(e, Error::InvalidPattern(6));
+        println!("{e}");
+
+        let kv = Pattern::compile("%{key} %{val} \\8");
+        let e = kv.expect_err("no error");
+        assert_eq!(e, Error::InvalidEscape('8'));
+        println!("{e}");
+
         let kv = Pattern::compile("%{key} %{val} ");
-        assert_eq!(kv.err(), Some(Error::DoubleSeperator(String::from(" "))));
+        let e = kv.expect_err("no error");
+        assert_eq!(e, Error::DoubleSeperator(String::from(" ")));
+        println!("{e}");
+
         let kv = Pattern::compile("%{key}=%{val}; %{key}:%{val} %{key}:%{val}");
-        assert_eq!(kv.err(), Some(Error::DoubleSeperator(String::from(" "))));
+        let e = kv.expect_err("no error");
+        assert_eq!(e, Error::DoubleSeperator(String::from(" ")));
+        println!("{e}");
+
         let kv = Pattern::compile("%{key}=%{val};%{key}:%{val} :%{key}:%{val}");
-        assert_eq!(kv.err(), Some(Error::DoubleSeperator(String::from(":"))));
+        let e = kv.expect_err("no error");
+        assert_eq!(e, Error::DoubleSeperator(String::from(":")));
+        println!("{e}");
     }
     #[test]
     fn one_field() {
