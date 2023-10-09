@@ -243,6 +243,12 @@ mod test {
     use simd_json::BorrowedValue;
 
     #[test]
+    fn default() {
+        let d = Pattern::default();
+        let p = Pattern::compile("%{key}:%{val}").expect("compile");
+        assert_eq!(d, p);
+    }
+    #[test]
     fn test_multisplit() {
         let seps = vec![String::from(" "), String::from(";")];
         let input = "this=is;a=test for:seperators";
