@@ -276,7 +276,7 @@ mod test {
     }
     #[test]
     fn newline_simple_() {
-        let kv = Pattern::compile(r#"\n%{key}=%{val}"#).expect("Failed to build pattern");
+        let kv = Pattern::compile(r"\n%{key}=%{val}").expect("Failed to build pattern");
         let r: BorrowedValue = kv.run("this=is\na=test").expect("Failed to split input");
         assert_eq!(r.as_object().map(Object::len).unwrap_or_default(), 2);
         assert_eq!(r["this"], "is");
