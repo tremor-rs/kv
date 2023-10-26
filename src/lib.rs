@@ -58,7 +58,7 @@
 #![allow(clippy::must_use_candidate)]
 
 use serde::{Deserialize, Serialize};
-use simd_json::prelude::*;
+use simd_json::prelude::{MutableObject, *};
 use std::fmt;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -200,8 +200,9 @@ impl Pattern {
     /// Note: Fields that have on value are dropped.
     pub fn run<'input, V>(&self, input: &'input str) -> Option<V>
     where
-        V: ValueTrait + ValueAccess<Target = V> + Mutable + Builder<'input> + 'input,
-        <V as ValueAccess>::Key: std::convert::From<&'input str>,
+        V: ValueBuilder<'input> + MutableObject + 'input,
+        <V as MutableObject>::Key: std::hash::Hash + Eq + From<&'input str>,
+        <V as MutableObject>::Target: std::convert::From<&'input str>,
     {
         let mut r = V::object();
         let mut empty = true;
