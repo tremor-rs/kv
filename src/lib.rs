@@ -72,9 +72,15 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::InvalidPattern(p) => write!(f, "invalid pattern at character {p}"),
-            Self::DoubleSeperator(s) => write!(f, "The seperator '{s}' is used for both key value seperation as well as pair seperation."),
+            Self::DoubleSeperator(s) => write!(
+                f,
+                "The seperator '{s}' is used for both key value seperation as well as pair seperation."
+            ),
             Self::InvalidEscape(s) => write!(f, "Invalid escape sequence \\'{s}' is not valid."),
-            Self::UnterminatedEscape => write!(f, "Unterminated escape at the end of line or of a delimiter %{{ can't be escaped"),
+            Self::UnterminatedEscape => write!(
+                f,
+                "Unterminated escape at the end of line or of a delimiter %{{ can't be escaped"
+            ),
         }
     }
 }
@@ -213,11 +219,7 @@ impl Pattern {
                 r.insert(kv[0], kv[1]).ok()?;
             }
         }
-        if empty {
-            None
-        } else {
-            Some(r)
-        }
+        if empty { None } else { Some(r) }
     }
 }
 
@@ -240,8 +242,8 @@ fn multi_split<'input>(input: &'input str, seperators: &[String]) -> Vec<&'input
 #[cfg(test)]
 mod test {
     use super::*;
-    use simd_json::borrowed::Object;
     use simd_json::BorrowedValue;
+    use simd_json::borrowed::Object;
 
     #[test]
     fn default() {

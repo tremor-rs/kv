@@ -2,13 +2,13 @@
 name = "tremor-kv"
 version = "0.6.2"
 authors = ["The Tremor Team"]
-edition = "2021"
+edition = "2024"
 license = "Apache-2.0"
 description = "A logstash inspured key value extractor"
 readme = "README.md"
 
 [dependencies]
-simd-json = { version = "0.13" }
+simd-json = { version = "0.15" }
 serde = "1"
 
 [features]
