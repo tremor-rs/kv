@@ -259,8 +259,8 @@ mod test {
         let i = multi_split(input, &seps);
         assert_eq!(i, vec!["this=is", "a=test", "for:seperators"]);
     }
-    #[test]
 
+    #[test]
     fn simple_split() {
         let kv = Pattern::compile("%{key}=%{val}").expect("Failed to build pattern");
         let r: BorrowedValue = kv.run("this=is a=test").expect("Failed to split input");
@@ -359,7 +359,7 @@ mod test {
     }
 
     #[test]
-    fn different_seperatpors() {
+    fn different_seperators() {
         let kv = Pattern::compile("%{key}=%{val};%{key}:%{val} %{key}:%{val}")
             .expect("Failed to build pattern");
         dbg!(&kv);
@@ -374,7 +374,7 @@ mod test {
     }
 
     #[test]
-    fn different_seperatpors2() {
+    fn different_seperators2() {
         let kv = Pattern::compile("%{key}=%{val}%{key}:%{val} %{key}:%{val};")
             .expect("Failed to build pattern");
         let r: BorrowedValue = kv
@@ -402,47 +402,16 @@ mod test {
         assert_eq!(r["a"], "test");
         assert_eq!(r["for"], "seperators");
     }
+
+    #[test]
+    fn unfinished_escape_in_pattern() {
+        let res = Pattern::compile(r"%{key}=%{val}; \");
+        assert_eq!(Err(Error::UnterminatedEscape), res);
+        if let Err(e) = res {
+            assert_eq!(
+                "Unterminated escape at the end of line or of a delimiter %{ can't be escaped",
+                &e.to_string()
+            );
+        }
+    }
 }
-/*
-
-Functions:
-
-map::select(<map>, [<key>, ...])
-  keeps only the given keys in an object this would make include keys be part of TS
-
-
-
-*/
-
-/*
-
-15 kv {
-16   source       => "full_message"
-17   include_keys => ["hits", "status", "QTime"]
-18 }
-19
-20 kv {
-21   source       => "full_message"
-22   field_split  => "&"
-23   include_keys => ["qt"]
-24 }
-
-92   kv {
-93     source       => "naxsi_params"
-94     field_split  => "&"
-95     include_keys => ["ip", "server", "uri", "learning", "vers", "total_processed", "total_blocked", "block"]
-96   }
-
-142       kv {
-143         source       => "dispatcher_params"
-144         field_split  => "&"
-145         include_keys => ["_controller", "_action"]
-146         remove_field => "dispatcher_params"
-147       }
-
-22     kv {
-23       source => "syslog_message"
-24       remove_field => [ "syslog_message" ]
-25     }
-
- */
