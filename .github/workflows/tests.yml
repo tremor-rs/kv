@@ -6,13 +6,12 @@ jobs:
   tests-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           components: llvm-tools-preview
           toolchain: stable
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: Generate code coverage
@@ -20,7 +19,7 @@ jobs:
           RUSTFLAGS: -D warnings -C target-cpu=native
           RUST_BACKTRACE: 1
         run: cargo llvm-cov --workspace --lcov --output-path lcov.txt
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
         with:
           files: ./lcov.txt # optional
           fail_ci_if_error: true # optional (default = false)

@@ -6,7 +6,7 @@ jobs:
   license:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Check license headers
         run: ./.github/checks/copyright.sh
   sanity:
@@ -22,17 +22,15 @@ jobs:
         run: sudo snap install remarshal
       - name: Install deps
         run: sudo snap install --classic ripgrep
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Check for unused dependencies
         run: ./.github/checks/deps.sh .
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/toolchain@master
         with:
-          override: true
-          profile: minimal
           components: rustfmt
           toolchain: stable
       - name: Check Formating
@@ -40,12 +38,10 @@ jobs:
   clippy-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: Swatinem/rust-cache@v1
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/toolchain@master
         with:
-          override: true
-          profile: minimal
           components: clippy
           toolchain: stable
       - name: Check workflow permissions
