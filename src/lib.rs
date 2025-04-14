@@ -405,7 +405,7 @@ mod test {
 
     #[test]
     fn unfinished_escape_in_pattern() {
-        let res = Pattern::compile(r"%{key}=%{val}; \");
+        let res = Pattern::compile(r"%{key}=%{val}; \\\r\n\t\");
         assert_eq!(Err(Error::UnterminatedEscape), res);
         if let Err(e) = res {
             assert_eq!(
