@@ -72,10 +72,12 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::InvalidPattern(p) => write!(f, "invalid pattern at character {p}"),
-            Self::DoubleSeperator(s) => write!(
-                f,
-                "The seperator '{s}' is used for both key value seperation as well as pair seperation."
-            ),
+            Self::DoubleSeperator(s) => {
+                write!(
+                    f,
+                    "The seperator '{s}' is used for both key value seperation as well as pair seperation."
+                )
+            }
             Self::InvalidEscape(s) => write!(f, "Invalid escape sequence \\'{s}' is not valid."),
             Self::UnterminatedEscape => write!(
                 f,
@@ -331,6 +333,11 @@ mod test {
         let kv = Pattern::compile("%{key} %{val} ");
         let e = kv.expect_err("no error");
         assert_eq!(e, Error::DoubleSeperator(String::from(" ")));
+        println!("{e}");
+
+        let kv = Pattern::compile("%{key}=%{val} %{key}==%{val}");
+        let e = kv.expect_err("no error");
+        assert_eq!(e, Error::DoubleSeperator(String::from("=")));
         println!("{e}");
 
         let kv = Pattern::compile("%{key}=%{val}; %{key}:%{val} %{key}:%{val}");
