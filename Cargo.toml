@@ -6,6 +6,9 @@ edition = "2024"
 license = "Apache-2.0"
 description = "A logstash inspured key value extractor"
 readme = "README.md"
+repository = "https://github.com/tremor-rs/kv"
+documentation = "https://docs.rs/tremor-kv"
+homepage = "https://github.com/tremor-rs/kv"
 
 [dependencies]
 simd-json = { version = "0.15" }
