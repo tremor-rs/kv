@@ -12,7 +12,7 @@ jobs:
   sanity:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Safety checks
         run: ./.github/checks/safety.sh -a
   unused-deps:
