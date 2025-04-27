@@ -18,3 +18,8 @@ updates:
   - dependency-name: serde
     versions:
     - 1.0.124
+- package-ecosystem: "github-actions"
+  directory: "/"
+  # Check for updates every Monday
+  schedule:
+    interval: "weekly"
