@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.3](https://github.com/tremor-rs/kv/compare/v0.7.2...v0.7.3) - 2025-09-12
+
+### Other
+
+- Bump actions/checkout from 4 to 5
+
 ## [0.7.2](https://github.com/tremor-rs/kv/compare/v0.7.1...v0.7.2) - 2025-09-12
 
 ### Other
