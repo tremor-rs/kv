@@ -1,6 +1,6 @@
 [package]
 name = "tremor-kv"
-version = "0.7.1"
+version = "0.7.2"
 authors = ["The Tremor Team"]
 edition = "2024"
 license = "Apache-2.0"
