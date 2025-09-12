@@ -11,7 +11,7 @@ documentation = "https://docs.rs/tremor-kv"
 homepage = "https://github.com/tremor-rs/kv"
 
 [dependencies]
-simd-json = { version = "0.15" }
+simd-json = { version = "0.16" }
 serde = "1"
 
 [features]
